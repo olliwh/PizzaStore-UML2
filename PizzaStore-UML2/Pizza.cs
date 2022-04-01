@@ -8,18 +8,18 @@ namespace PizzaStore_UML2
     public class Pizza
     {
         #region Instance Fields
-        private int _pizzaNumber;
-        private string _pizzaName;
-        private int _pizzaPrice;
+        private int _number;
+        private string _name;
+        private int _price;
         private List<Topping> _toppings;
         #endregion
 
         #region Constructor
         public Pizza(int number,string name, int price)
         {
-            _pizzaNumber = number;
-            _pizzaName = name;
-            _pizzaPrice = price;
+            _number = number;
+            _name = name;
+            _price = price;
             _toppings = new List<Topping>();
             Topping sauce = new Topping("Sause");
             Topping cheese = new Topping("Cheese");
@@ -29,9 +29,9 @@ namespace PizzaStore_UML2
         #endregion
 
         #region Properties
-        public int PizzaNumber { get { return _pizzaNumber; } set { _pizzaNumber = value; } }
-        public string PizzaName { get { return _pizzaName; } set { _pizzaName = value; } }
-        public int PizzaPrice { get { return _pizzaPrice; } set { _pizzaPrice = value; } }
+        public int Number { get { return _number; } set { _number = value; } }
+        public string Name { get { return _name; } set { _name = value; } }
+        public int Price { get { return _price; } set { _price = value; } }
 
         public List<Topping> Toppings {  get { return _toppings; } }
         #endregion
@@ -39,8 +39,7 @@ namespace PizzaStore_UML2
         #region Methods
         public override string ToString()
         {
-            return $"{_pizzaName}, {_pizzaPrice:C}";
-            // {_pizzaNumber}. 
+            return $"{_name}, {_price:C}";
         }
         #region Topping methods
         public void SeeTopping()
@@ -53,14 +52,11 @@ namespace PizzaStore_UML2
                 number++;
             }
         }       
-        //public void AddTopping(Topping topping)
-        //{
-        //    _toppings.Add(topping);
-        //}
         public void DeleteTopping(Topping topping)
         {
             _toppings.Remove(topping);
         }
+
 
         #endregion
         #endregion

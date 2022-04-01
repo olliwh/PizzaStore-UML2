@@ -6,7 +6,7 @@ namespace PizzaStore_UML2
 {
     public class Topping
     {
-        string _name;
+        private string _name;
         public Topping(string name)
         {
             _name = name;
