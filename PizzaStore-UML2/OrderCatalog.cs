@@ -91,16 +91,16 @@ namespace PizzaStore_UML2
                         }
                     case 2:
                         {
-                            //Console.WriteLine("Do you want to make a new customer");
-                            //if (UserInput.GetYesOrNoIput()) CreateCustomer();
-                            //else
-                            //{
-                            Console.WriteLine("Type name of customer");
+                            Console.WriteLine("Do you want to make a new customer first?");
+                            if (UserInput.GetYesOrNoIput()) _cc.CreateCustomer();
+                            else
+                            {
+                                Console.WriteLine("Type name of customer");
                             string nameOfCustomer = Console.ReadLine();
                             Customer newCustomer = _cc.Search(nameOfCustomer);
                             orderToUpdate.OrderCustomer = newCustomer;
                             Console.WriteLine(orderToUpdate);
-                            //}
+                            }
                             break;
                         }
                     case 3:
