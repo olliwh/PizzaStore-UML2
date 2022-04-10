@@ -6,7 +6,7 @@ namespace PizzaStore_UML2
     {
         static void Main(string[] args)
         {
-            Store store = new Store();
+            Store store = new Store("Big Mammas Pizzaria");
             store.Start();
 
         }

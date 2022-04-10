@@ -19,21 +19,14 @@ namespace PizzaStore_UML2
         public List<Pizza> Pizzas { get { return _pizzas; } }
         public Customer OrderCustomer { get { return _customer; } set { _customer = value; } }
         public int ID { get { return _id; } set { _id = value; } }
-        public void PrintOrder()
+        public void GetOrder()
         {
-            Console.WriteLine($"Order ID: {_id}. Customer {_customer.Name}. ");
+            Console.WriteLine($"Order ID: {_id}. Customer {_customer.Name}: ");
             foreach(var pizza in _pizzas)
             {
-                Console.WriteLine(pizza);
-                foreach(var topping in pizza.Toppings)
-                {
-                    Console.WriteLine(" - " + topping);
-                }
+                pizza.GetPizza();
             }
-        }
-        public override string ToString()
-        {
-            return $"Id {_id}. {_customer.Name}";
+            Console.WriteLine();
         }
     }
 }

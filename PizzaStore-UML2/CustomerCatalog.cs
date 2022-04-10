@@ -12,55 +12,57 @@ namespace PizzaStore_UML2
             _customerList = new List<Customer>();
         }
         public List<Customer> CustomerList { get { return _customerList; } }
-        #region Customer
+        #region Methods
         public void CustomerStartMenu()
         {
             Console.WriteLine("CUSTOMER MENU");
-            int choice = UserInput.MenuChoices("Customer");
-            if (choice == 1) CreateCustomer();
+            int choice = Store.MenuChoices("Customer");
+            if (choice == 1) CreateDialog();
             if(_customerList.Count == 0)
             {
                 Console.WriteLine("You have no Customers");
                 Store.TopMenu();
             }
-            if (choice == 2) UpdateCustomer();
+            if (choice == 2) UpdateDialog();
             if (choice == 3) DeleteCustomer();
-            if (choice == 4) SearchForCustomer();
-            if (choice == 5) ReadCustomer();
-            if (choice == 6) SeeCustomerList();
+            if (choice == 4) SearchDialog();
+            if (choice == 5) ReadDialog();
+            if (choice == 6)
+            {
+                Console.WriteLine("LIST OF CUSTOMERS");
+                PrintCustomerList();
+                Console.WriteLine();
+                CustomerStartMenu();
+            }
             if (choice == 7) Store.TopMenu();
-            else Console.WriteLine("The END");
         }
-        public void CreateCustomer()
+        private void CreateDialog()
         {
             while (true)
             {
                 Console.WriteLine("CREATE CUSTOMER");
-                string name = UserInput.GetName("Customer");
-                Console.WriteLine("Type mail and press enter");
-                string mail = Console.ReadLine();
+                string name = Store.GetName("Customer");
+                string mail = Store.GetMail();
                 Console.WriteLine("Type phone number and press enter");
-                int phone = UserInput.GetLongNumber();
-                Customer c =  Create(name, mail, phone);
-                Console.WriteLine($"{c.Name} was created");
-                if (!UserInput.EndLoop("Create", "Customer")) break;
+                int phone = Store.GetLongNumber();
+                while (phone < 10000000) 
+                {
+                    Console.WriteLine("Must be 8 charecters");
+                    phone = Store.GetLongNumber();
+                }
+                Customer c = Create(name, mail, phone);
+                c.GetCustomer();
+                Console.WriteLine($"was created");
+                if (!Store.EndLoop("Create", "Customer")) break;
             }
             CustomerStartMenu();
         }
-        public Customer Create(string name, string mail, int phone)
-        {
-            Customer customer = new Customer(name, mail, phone);
-            _customerList.Add(customer);
-            return customer;
-        }
-        public void UpdateCustomer()
+        private void UpdateDialog()
         {
             while (true)
             {
                 Console.WriteLine("UPDATE CUSTOMER");
-                 PrintCustomerList();
-                Console.WriteLine("Sellect number of customer you want to update and press enter");
-                Customer customerToUpdate =  CustomerList[UserInput.GetNumberInputFromUser( CustomerList.Count) - 1];
+                Customer customerToUpdate = Store.GetCustomer(_customerList);
                 Console.WriteLine(customerToUpdate);
                 Console.WriteLine("What do you want to update?");
                 List<string> list = new List<string>()
@@ -69,94 +71,85 @@ namespace PizzaStore_UML2
                     "Mail",
                     "Phone"
                 };
-                int whatToUpdate = UserInput.StringListChoice(list);
+                int whatToUpdate = Store.StringListChoice(list);
                 switch (whatToUpdate)
                 {
                     case 1:
                         {
-                            customerToUpdate.Name = UserInput.GetName("Customer");
+                            customerToUpdate.Name = Store.GetName("Customer");
                             break;
                         }
                     case 2:
                         {
-                            Console.WriteLine("Type mail of customer and press enter");
-                            string mail = Console.ReadLine();
-                            customerToUpdate.Mail = mail;
-                            break;
+                            customerToUpdate.Mail = Store.GetMail();
+                            break;  
                         }
                     case 3:
                         {
                             Console.WriteLine("Type phone number of customer and press enter");
-                            int phone = UserInput.GetLongNumber();
+                            int phone = Store.GetLongNumber();
                             customerToUpdate.PhoneNumber = phone;
                             break;
                         }
                 }
-                if (!UserInput.EndLoop("Update", "Customer")) break;
+                customerToUpdate.GetCustomer();
+                Console.WriteLine("was updated");
+                if (!Store.EndLoop("Update", "Customer")) break;
             }
             CustomerStartMenu();
         }
-        public void DeleteCustomer()
+        private void DeleteCustomer()
         {
             while (true)
             {
                 Console.WriteLine("DELETE CUSTOMER");
-                 PrintCustomerList();
-                Console.WriteLine("Sellect number of customer you want to Delete and press enter");
-                Customer customerToDelete =  CustomerList[UserInput.GetNumberInputFromUser( CustomerList.Count) - 1];
+                Customer customerToDelete =  Store.GetCustomer(_customerList);
                 _customerList.Remove(customerToDelete);
-                Console.WriteLine($"{customerToDelete} has been Deleted");
+                foreach(var order in customerToDelete.Orders)
+                {
+                    OrderCatalog.Delete(order);
+                }
+                customerToDelete.GetCustomer();
+                Console.WriteLine($"has been Deleted");
                 if (_customerList.Count == 0) break;
-                if (!UserInput.EndLoop("Delete", "Customer")) break;
+                if (!Store.EndLoop("Delete", "Customer")) break;
             }
             CustomerStartMenu();
         }
-        public void SearchForCustomer()
+        private void SearchDialog()
         {
             while (true)
             {
-                Console.WriteLine("CUSTOMER SEARCH");
-                 PrintCustomerList();
-                Console.WriteLine("Search for customer by name");
-                string name = Console.ReadLine();
+                Console.WriteLine("CUSTOMER SEARCH BY NAME");
+                PrintCustomerList();
+                string name = Store.GetName("Customer");
                 Customer customerToFind =  Search(name);
                 if (customerToFind == null) Console.WriteLine("Not Found");
                 else
                 {
-                    Console.WriteLine(customerToFind);
-                    foreach(var order in customerToFind.Orders)
-                    {
-                        order.PrintOrder();
-                    }
-                    if (!UserInput.EndLoop("Search for", "Customer")) break;
+                    customerToFind.GetCustomer();
+                    if (!Store.EndLoop("Search for", "Customer")) break;
                 }
             }
             CustomerStartMenu();
         }
-        public Customer Search(string name)
-        {
-            Customer customerToFind = _customerList.Find(x => x.Name == name);
-            return customerToFind;
-        }
-        public void ReadCustomer()
+        private void ReadDialog()
         {
             while (true)
             {
                 Console.WriteLine("READ CUSTOMER");
                 Console.WriteLine("Search for Customer by phone number");
                 PrintCustomerList();
-                int phoneNumber = UserInput.GetLongNumber();
+                int phoneNumber = Store.GetLongNumber();
                 Customer customerToRead = _customerList.Find(x => x.PhoneNumber == phoneNumber);
-                Console.WriteLine(customerToRead);
-                customerToRead.PrintOrder();
-                Console.WriteLine("Du you want to Read another Customer? Y/ENTER");
-                if (!UserInput.GetYesOrNoIput()) break;
+                if (customerToRead == null) Console.WriteLine("Not found");
+                else
+                {
+                    customerToRead.GetCustomer();
+                    Console.WriteLine("Du you want to Read another Customer? Y/ENTER");
+                    if (!Store.GetYesOrNoIput()) break;
+                }
             }
-        }
-        public void SeeCustomerList()
-        {
-            Console.WriteLine("LIST OF CUSTOMERS");
-            PrintCustomerList();
             CustomerStartMenu();
         }
         public void PrintCustomerList()
@@ -167,6 +160,21 @@ namespace PizzaStore_UML2
                 Console.WriteLine($"{number}. {customer}");
                 number++;
             }
+        }
+        public Customer Search(string name)
+        {
+            Customer customerToFind = _customerList.Find(x => x.Name == name);
+            return customerToFind;
+        }
+        public Customer Create(string name, string mail, int phone)
+        {
+            Customer customer = new Customer(name, mail, phone);
+            _customerList.Add(customer);
+            return customer;
+        }
+        public void DeleteCustomersOrder(Customer customer, Order orderToDelete)
+        {
+            customer.Orders.Remove(orderToDelete);
         }
         #endregion
     }

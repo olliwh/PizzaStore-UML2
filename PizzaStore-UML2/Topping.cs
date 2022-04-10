@@ -12,9 +12,9 @@ namespace PizzaStore_UML2
             _name = name;
         }
         public string Name { get { return _name; } }
-        public override string ToString()
+        public string GetTopping()
         {
-            return $"{_name}";
+            return _name;
         }
     }
 }

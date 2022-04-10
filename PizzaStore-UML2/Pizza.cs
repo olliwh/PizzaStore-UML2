@@ -41,14 +41,14 @@ namespace PizzaStore_UML2
         {
             return $"{_name}, {_price:C}";
         }
-        #region Topping methods
+
         public void SeeTopping()
         {
             Console.WriteLine("Containing: ");
             int number = 1;
             foreach (var topping in _toppings)
             {
-                Console.WriteLine($"{number}. {topping}");
+                Console.WriteLine($"{number}. {topping.GetTopping()}");
                 number++;
             }
         }       
@@ -56,10 +56,13 @@ namespace PizzaStore_UML2
         {
             _toppings.Remove(topping);
         }
-
-
+        public void GetPizza()
+        {
+            Console.WriteLine($"Number: {_number}, Name: {_name}, Price: {_price:C}");
+            SeeTopping();
+        }
         #endregion
-        #endregion
+
 
     }
 }

@@ -18,24 +18,28 @@ namespace PizzaStore_UML2
             _mail = mail;
             _phoneNumber = phoneNumber;
             _orders = new List<Order>();
-
-            
         }
         public List<Order> Orders { get { return _orders; } set { _orders = value; } }
         public string Name { get { return _name; } set { _name = value; } }
         public string Mail { get { return _mail; } set { _mail = value; } }
         public int PhoneNumber { get { return _phoneNumber; } set { _phoneNumber = value; } }
 
-        public void PrintOrder()
+        public void GetOrder()
         {
             if (_orders.Count == 0) Console.WriteLine("They have no orders");
             else
             {
                 foreach(var order in _orders)
                 {
-                    order.PrintOrder();
+                    order.GetOrder();
                 }
             }
+        }
+        public void GetCustomer()
+        {
+            Console.Write($"Name: {_name}, Mail: {_mail}, Phone: {_phoneNumber} ");
+            Console.WriteLine();
+            GetOrder();
         }
         public override string ToString()
         {

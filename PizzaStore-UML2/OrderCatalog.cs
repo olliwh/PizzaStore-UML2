@@ -6,7 +6,7 @@ namespace PizzaStore_UML2
 {
     public class OrderCatalog
     {
-        private List<Order> _orderList;
+        private static List<Order> _orderList;
         private CustomerCatalog _cc;
         private MenuCatalog _mc;
         public OrderCatalog()
@@ -16,90 +16,81 @@ namespace PizzaStore_UML2
             _mc = new MenuCatalog();
         }
         public List<Order> OrderList { get { return _orderList; } }   
-        public void OrderMenu()
+        public void OrderStartMenu()
         {
             Console.WriteLine("ORDER MENU");
-            int input = UserInput.MenuChoices("Order");
-            if (input == 1) CreateOrder();
+            int input = Store.MenuChoices("Order");
+            if (input == 1) CreateDialog();
             if(_orderList.Count == 0)
             {
                 Console.WriteLine("You have no orders");
                 Store.TopMenu();
             }
-            if (input == 2) UpdateOrder();
-            if (input == 3) DeleteOrder();
-            if (input == 4) SearchOrder();
-            if (input == 5) ReadOrder();
-            if (input == 6) PrintOrders();
+            if (input == 2) UpdateDialog();
+            if (input == 3) DeleteDialog();
+            if (input == 4) SearchDialog();
+            if (input == 5) ReadDialog();
+            if (input == 6)
+            {
+                Console.WriteLine("List of all Orders");
+                PrintOrderList();
+                Console.WriteLine();
+                OrderStartMenu();
+            }
             if (input == 7) Store.TopMenu();
         }
-        public void CreateOrder()
+        private void CreateDialog()
         {
             Console.WriteLine("MAKE ORDER");
             while (true)
             {
-                _cc.PrintCustomerList();
-                Console.WriteLine("Write number of customer");
-                int index = UserInput.GetNumberInputFromUser(_cc.CustomerList.Count) - 1;
-                Customer customerOfOrder = _cc.CustomerList[index];
-
-                if (customerOfOrder == null) Console.WriteLine("Not Found");
-                else
-                {
-                    Order newOrder = CreateOrder(customerOfOrder);
+                Customer customerOfOrder = Store.GetCustomer(_cc.CustomerList);
+                    Order newOrder = Create(customerOfOrder);
                     _mc.AddPizzasToOrder(newOrder);
-
-                }
-                if (!UserInput.EndLoop("Create", "Order")) break;
+                    newOrder.GetOrder();
+                if (!Store.EndLoop("Create", "Order")) break;
             }
-            OrderMenu();
+            OrderStartMenu();
         }
-        public Order CreateOrder(Customer customer)
-        {
-            Order o = new Order(customer);
-            _orderList.Add(o);
-            customer.Orders.Add(o);
-            o.ID = _orderList.Count;
-            return o;
-        }
-        public void UpdateOrder()
+        private void UpdateDialog()
         {
             while (true)
             {
                 Console.WriteLine("UPDATE ORDER");
-                Console.WriteLine("What order would you like to update?");
-                PrintAllOrders();
-                int index = UserInput.GetNumberInputFromUser(OrderList.Count) - 1;
-                Order orderToUpdate = OrderList[index];
+                Order orderToUpdate = Store.GetOrder(_orderList);
                 Console.WriteLine("What do you want to update?");
                 List<string> l = new List<string>()
                 {
                     "ID",
-                    "Customer",
+                    "Change Customer",
                     "Pizzas"
                 };
-                int whatToUpdate = UserInput.StringListChoice(l);
+                int whatToUpdate = Store.StringListChoice(l);
                 switch (whatToUpdate)
                 {
                     case 1:
                         {
                             Console.WriteLine("Type new ID");
-                            int newID = UserInput.GetLongNumber();
+                            int newID = Store.GetLongNumber();
                             orderToUpdate.ID = newID;
-                            Console.WriteLine(orderToUpdate);
+                            orderToUpdate.GetOrder();
                             break;
                         }
                     case 2:
                         {
-                            Console.WriteLine("Do you want to make a new customer first?");
-                            if (UserInput.GetYesOrNoIput()) _cc.CreateCustomer();
-                            else
+                            while (true)
                             {
                                 Console.WriteLine("Type name of customer");
-                            string nameOfCustomer = Console.ReadLine();
-                            Customer newCustomer = _cc.Search(nameOfCustomer);
-                            orderToUpdate.OrderCustomer = newCustomer;
-                            Console.WriteLine(orderToUpdate);
+                                _cc.PrintCustomerList();
+                                string nameOfCustomer = Console.ReadLine();
+                                Customer changedCustomer = _cc.Search(nameOfCustomer);
+                                if (changedCustomer == null) Console.WriteLine("Not a customer");
+                                else
+                                {
+                                    orderToUpdate.OrderCustomer = changedCustomer;
+                                    Console.WriteLine(orderToUpdate);
+                                    break;
+                                }
                             }
                             break;
                         }
@@ -111,7 +102,7 @@ namespace PizzaStore_UML2
                         "Delete Pizza",
                         "Change topping"
                     };
-                            int input = UserInput.StringListChoice(list);
+                            int input = Store.StringListChoice(list);
                             switch (input)
                             {
                                 case 1:
@@ -123,11 +114,10 @@ namespace PizzaStore_UML2
                                     {
                                         while (true)
                                         {
-                                            RemovePizzaFromOrder(orderToUpdate);
+                                            DeletePizzaFromOrder(orderToUpdate);
                                             Console.WriteLine("Delete more from order? Y/ENTER");
-                                            if (!UserInput.GetYesOrNoIput())
+                                            if (!Store.GetYesOrNoIput())
                                             {
-                                                orderToUpdate.PrintOrder();
                                                 break;
                                             }
                                         }
@@ -135,7 +125,7 @@ namespace PizzaStore_UML2
                                     }
                                 case 3:
                                     {
-                                        Pizza pizzaToChange = UserInput.GetPizza(orderToUpdate.Pizzas);
+                                        Pizza pizzaToChange = Store.GetPizza(orderToUpdate.Pizzas);
                                         _mc.ChangeTopping(pizzaToChange);
                                         break;
                                     }
@@ -143,104 +133,98 @@ namespace PizzaStore_UML2
                             break;
                         }
                 }
-                orderToUpdate.PrintOrder();
+                orderToUpdate.GetOrder();
                 Console.WriteLine("Has been updated");
-                if (!UserInput.EndLoop("Update", "Order")) break;
+                if (!Store.EndLoop("Update", "Order")) break;
             }
-            OrderMenu();
+            OrderStartMenu();
         }
-
-        public void RemovePizzaFromOrder(Order order)
-        {
-            int number = 1;
-            foreach (var pizza in order.Pizzas)
-            {
-                Console.WriteLine($"{number}. {pizza}");
-                number++;
-            }
-            Console.WriteLine("What pizza do you want to delete?");
-            int index = UserInput.GetNumberInputFromUser(order.Pizzas.Count) - 1;
-            Pizza pizzaToDelete = order.Pizzas[index];
-            order.Pizzas.Remove(pizzaToDelete);
-        }
-        public void DeleteOrder()
+        private void DeleteDialog()
         {
             while (true)
             {
                 Console.WriteLine("DELETE ORDER");
-                Console.WriteLine("What order do you want to Delete?");
-                PrintAllOrders();
-                int input = UserInput.GetNumberInputFromUser(OrderList.Count);
-                Order orderToDelete = OrderList[input - 1];
-                _orderList.Remove(orderToDelete);
+                Order orderToDelete = Store.GetOrder(_orderList);
+                Delete(orderToDelete);
+                _cc.DeleteCustomersOrder(orderToDelete.OrderCustomer, orderToDelete);
                 Console.WriteLine($"Order {orderToDelete.ID} has been deleted");
                 if (_orderList.Count == 0) break;
-                if (!UserInput.EndLoop("Delete", "Order")) break;
+                if (!Store.EndLoop("Delete", "Order")) break;
             }
-            OrderMenu();
+            OrderStartMenu();
         }
-
-        public void SearchOrder()
+        private void SearchDialog()
         {
             while (true)
             {
-                Console.WriteLine("Write name of cusomer");
-
                 _cc.PrintCustomerList();
-                string name = Console.ReadLine();
-                SearchOrder(name);
-                if (!UserInput.EndLoop("Search for", "Order"))break;
+                string name = Store.GetName("customer");
+                Search(name);
+                if (!Store.EndLoop("Search for", "Order"))break;
             }
-            OrderMenu();
+            OrderStartMenu();
         }
-        public void SearchOrder(string name)
+        private void ReadDialog()
         {
-            Customer cus = _cc.Search(name);
-            if (cus == null) Console.WriteLine("net a customer");
-            else
-            {
-                if (cus.Orders.Count == 0) Console.WriteLine("This customr has no orders");
-                foreach (var order in cus.Orders)
-                {
-                    order.PrintOrder();
-                }
-            }
-        }
-
-        public void ReadOrder()
-        {
+            
+            Console.WriteLine("READ ORDER");
+            PrintOrderList();
             while (true)
             {
-                Console.WriteLine("READ ORDER");
-                PrintAllOrders();
                 Console.WriteLine("Search for order by ID");
-                int idToFind = UserInput.GetLongNumber();
-
+                int idToFind = Store.GetLongNumber();
+            
                 Order orderToRead = _orderList.Find(x => x.ID == idToFind);
-
-                Console.WriteLine(orderToRead);
-                orderToRead.PrintOrder();
-                if (!UserInput.EndLoop("Read", "Order"))break;
+                if (orderToRead == null) Console.WriteLine("Not found");
+                else
+                {
+                    Console.WriteLine(orderToRead);
+                    orderToRead.GetOrder();
+                    if (!Store.EndLoop("Read", "Order")) break;
+                }
 
             }
-            OrderMenu();
+            OrderStartMenu();
         }
-        public void PrintAllOrders()
+        public void PrintOrderList()
         {
             int number = 1;
             foreach (var order in _orderList)
             {
-                Console.WriteLine($"Nr. {number}.");
-                Console.WriteLine($"ID: {order.ID}   {order.OrderCustomer.Name}");
-                order.PrintOrder();
+                order.GetOrder();
                 Console.WriteLine();
                 number++;
             }
         }
-        public void PrintOrders()
+        public void Search(string name)
         {
-            PrintAllOrders();
-            OrderMenu();
+            Customer cus = _cc.Search(name);
+            if (cus == null) Console.WriteLine("Not a customer");
+            else
+            {
+                if (cus.Orders.Count == 0) Console.WriteLine("This customer has no orders");
+                foreach (var order in cus.Orders)
+                {
+                    order.GetOrder();
+                }
+            }
+        }
+        public Order Create(Customer customer)
+        {
+            Order o = new Order(customer);
+            _orderList.Add(o);
+            customer.Orders.Add(o);
+            o.ID = _orderList.Count;
+            return o;
+        }
+        public static void Delete(Order order)
+        {
+            _orderList.Remove(order);
+        }
+        public void DeletePizzaFromOrder(Order order)
+        {
+            Pizza pizzaToDelete = Store.GetPizza(order.Pizzas);
+            order.Pizzas.Remove(pizzaToDelete);
         }
 
 
